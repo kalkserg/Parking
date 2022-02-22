@@ -9,6 +9,7 @@ public class Device {
     @Id
     @GeneratedValue
     private Long id;
+
     private Long chatId;
     private String sigfoxName = "";
     private String sigfoxId = "";
