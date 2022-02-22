@@ -1,6 +1,5 @@
 package ua.utilix.Handlers;
 
-import com.sun.deploy.cache.BaseLocalApplicationProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
@@ -18,7 +17,6 @@ import ua.utilix.service.UserService;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 
 @Component
 public class CallbackQueryHandler implements Handler<CallbackQuery> {
@@ -47,7 +45,7 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
         User user = userService.findByChatId(chatId);
 
         //ADMIN
-        if(user.getAdmin()) {
+        if (user.getAdmin()) {
 
             if (callbackQuery.getData().equals(CALLBACK_ADD_REQUEST)) {
                 locstate = LocationState.StartRegLocation;
@@ -55,14 +53,14 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
                 locationService.addLocation(location);
 
                 loccontext = LocationContext.of(this, chatBot, user, location, "text");
-                locstate.enter(loccontext, chatId,this);
+                locstate.enter(loccontext, chatId, this);
 
                 locstate = locstate.nextState();
-                locstate.enter(loccontext, chatId,this);
+                locstate.enter(loccontext, chatId, this);
                 location.setStateId(locstate.ordinal());
                 locationService.updateLocation(location);
 
-             } else if (callbackQuery.getData().equals(CALLBACK_DEL_REQUEST)) {
+            } else if (callbackQuery.getData().equals(CALLBACK_DEL_REQUEST)) {
                 Integer messageId = callbackQuery.getMessage().getMessageId();
                 EditMessageText editMessageText = new EditMessageText();
                 editMessageText.setChatId(String.valueOf(callbackQuery.getMessage().getChatId()));
@@ -80,8 +78,8 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
                 location = locationService.findById(Id);
                 if (location != null) {
                     Device[] devices = deviceService.findBySigfoxId(location.getSigfoxId());
-                    for(Device dev : devices) {
-                        if(dev.getChatId()!=chatId) {
+                    for (Device dev : devices) {
+                        if (dev.getChatId() != chatId) {
                             sendMessage(chatBot, dev.getChatId(), "Видалено адміністратором" + " sigfoxId: " + location.getSigfoxId(), null, null);
                         }
                         deviceService.delDevice(dev);
@@ -100,7 +98,7 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
                 userService.updateUser(user);
             }
 
-        //NOADMIN
+            //NOADMIN
         } else {
             System.out.println(" callbackQuery.getData()  " + callbackQuery.getData());
             if (callbackQuery.getData().equals(CALLBACK_FOLLOW_REQUEST)) {
@@ -144,11 +142,11 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
                 long Id = Long.parseLong(subStr[1]);
                 System.out.println(" id " + Id);
                 device = deviceService.findById(Id);
-                if(device!=null) {
+                if (device != null) {
                     sendMessage(chatBot, chatId, "Припинено " + device.getSigfoxName() + " sigfoxId: " + device.getSigfoxId(), null, null);
                     deviceService.delDevice(device);
                     device = null;
-                }else{
+                } else {
                     sendMessage(chatBot, chatId, "Видалення неможливе!", null, null);
                 }
 
@@ -189,16 +187,16 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
     private ArrayList<String> getListLocationsNoFollow(LocationService locationService, List<String> ids) {
         List<Location> locations = locationService.findAllLocations();
         ArrayList<String> list = new ArrayList<>();
-        for(Location location : locations) {
+        for (Location location : locations) {
             String locId = String.format("%8.8s", location.getSigfoxId()).replace(' ', '0');
             int count = 0;
-            for( String id : ids){
+            for (String id : ids) {
                 String devId = String.format("%8.8s", id).replace(' ', '0');
-                if(locId.equals(devId)) {
+                if (locId.equals(devId)) {
                     count++;
                 }
             }
-            if(count==0) {
+            if (count == 0) {
                 list.add(location.getId().toString() + " - " +
                         " sigfoxId: " + locId +
                         " address: " + location.getAddr());
@@ -213,10 +211,10 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
         ArrayList<String> list = new ArrayList<>();
 
         devices.forEach(device ->
-            list.add(device.getId().toString() + " - " + device.getSigfoxName() +
-                    " (sigfoxId: " + String.format("%8.8s", device.getSigfoxId()).replace(' ', '0') +
-                    " chatId: " + device.getChatId() +
-                    " user: " + userService.findByChatId(device.getChatId()).getUserName() + ")")
+                list.add(device.getId().toString() + " - " + device.getSigfoxName() +
+                        " (sigfoxId: " + String.format("%8.8s", device.getSigfoxId()).replace(' ', '0') +
+                        " chatId: " + device.getChatId() +
+                        " user: " + userService.findByChatId(device.getChatId()).getUserName() + ")")
         );
         return list;
     }
@@ -228,8 +226,8 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
 
         locations.forEach(location ->
                 list.add(location.getId().toString() + " - " +
-                        " sigfoxId: " +  String.format("%8.8s", location.getSigfoxId()).replace(' ', '0') +
-                        " address: " + location.getAddr() )
+                        " sigfoxId: " + String.format("%8.8s", location.getSigfoxId()).replace(' ', '0') +
+                        " address: " + location.getAddr())
         );
         return list;
     }
@@ -241,7 +239,7 @@ public class CallbackQueryHandler implements Handler<CallbackQuery> {
 
         devices.forEach(device ->
                 list.add(device.getId().toString() + " - " + device.getSigfoxName() +
-                        " sigfoxId: " +  String.format("%8.8s", device.getSigfoxId()).replace(' ', '0') +
+                        " sigfoxId: " + String.format("%8.8s", device.getSigfoxId()).replace(' ', '0') +
                         " chatId: " + device.getChatId() +
                         " user: " + userService.findByChatId(device.getChatId()).getUserName() + ")")
         );
